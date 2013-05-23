@@ -1,0 +1,28 @@
+// Example Stylus file
+//
+// Stylus docs:  http://learnboost.github.com/stylus/docs/js.html
+// Nib docs:     http://visionmedia.github.com/nib
+
+@import url('/font/OpenSans.css')
+@import url('/font/DroidSansMono.css')
+
+FONT = 'Open Sans', 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, sans-serif
+FONTSIZE = 16px
+
+@import 'nib'
+
+global-reset()
+reset-html5()
+
+@import 'helpers'
+@import 'globals'
+@import 'CLI'
+@import 'widget'
+
+
+#cli
+	//position absolute
+	//top 60px
+	//left 300px
+	//width 600px
+	height 300px

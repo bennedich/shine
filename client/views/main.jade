@@ -1,0 +1,31 @@
+extends shared/base
+
+block title
+	title SHINE
+
+block body
+	include shared/header
+	
+	section#main
+		h1 main content
+		
+		div.modal
+			header.modal-header
+				b Terminal
+			div#cli.modal-body
+			footer.modal-footer
+				p term
+	
+	include shared/footer
+
+block bodyscripts
+	script
+		util = require('/util');
+		shine = require('/shine');
+		window.cli = new shine.Cli('#cli');
+		
+		$('.modal').draggable({
+			handle: '.modal-header'
+		});
+		
+		cli.focus();

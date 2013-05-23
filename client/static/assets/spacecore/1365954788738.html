@@ -1,0 +1,204 @@
+<!DOCTYPE html><!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html lang="en"><head><meta charset="utf-8"><link href="/assets/spacecore/1365954788738.css" media="screen" rel="stylesheet" type="text/css"><script src="/assets/spacecore/1365954788738.js" type="text/javascript"></script><script type="text/javascript">(function(){var ht=Hogan.Template,t=require('socketstream').tmpl;t['widget-main']=new ht(function(c,p,i){var _=this;_.b(i=i||"");_.b("<header><h1>");_.b(_.v(_.f("title",c,p,0)));_.b("</h1><button>&times;</button></header><section></section>");return _.fl();;});}).call(this);</script><title>test shine</title></head><body><table id="stats"><tr id="ffiBar"><td>ffi</td><td class="val">-</td></tr><tr id="fiBar"><td>fi</td><td class="val">-</td></tr><tr id="fpsBar"><td>fps</td><td class="val">-</td></tr><tr><td id="statsBar"></td></tr></table><canvas id="main"></canvas><script id="passthru_vert" type="x-shader/x-vertex">// MVP matrix
+uniform mat4 mMat; // vert -> model
+uniform mat4 vMat; // model -> cam
+uniform mat4 pMat; // cam -> clip
+uniform vec4 mClr;
+
+attribute vec3 vert;
+
+varying vec4 clr;
+
+void main()
+{
+	gl_Position = pMat * vMat * mMat * vec4(vert, 1.0);
+	clr = mClr;
+}
+</script><script id="passthru_frag" type="x-shader/x-fragment">#ifdef GL_ES
+precision highp float;
+#endif
+
+varying vec4 clr;
+
+void main()
+{
+	gl_FragColor = clr;
+}
+</script><script id="blinn_phong_vert" type="x-shader/x-vertex">// material
+//uniform vec3 m_ambient;
+//uniform vec3 m_diffuse;
+//uniform vec3 m_specular;
+//uniform float m_shininess;
+
+// light
+uniform vec3 l_ambient;
+uniform vec3 l_diffuse;
+//uniform vec3 l_specular;
+uniform vec3 l_position;
+
+// MVP matrix
+uniform mat4 mMat; // vert -> model
+uniform mat4 vMat; // model -> cam
+uniform mat4 pMat; // cam -> clip
+
+attribute vec3 vert;
+attribute vec3 norm;
+
+varying vec3 clr;
+
+void main()
+{
+	//gl_PointSize = 5.0;
+	
+	vec4 g_vert = mMat * vec4(vert, 1.0);
+	vec4 g_norm = normalize(mMat * vec4(norm, 0.0));
+	
+	gl_Position = pMat * vMat * mMat * vec4(vert, 1.0);
+	
+	// diffuse directional
+	float dCosIncidence = dot(g_norm.xyz, l_position); // use position as direction
+	dCosIncidence = clamp(dCosIncidence, 0.0, 1.0);
+	
+	// resulting color
+	clr = l_diffuse * dCosIncidence + l_ambient;
+}</script><script id="blinn_phong_frag" type="x-shader/x-fragment">#ifdef GL_ES
+precision highp float;
+#endif
+
+varying vec3 clr;
+
+void main()
+{
+	gl_FragColor = vec4(clr, 1.0);
+}
+</script><script id="point_round_vert" type="x-shader/x-vertex">// MVP matrix
+uniform mat4 mMat; // vert -> model
+uniform mat4 vMat; // model -> cam
+uniform mat4 pMat; // cam -> clip
+uniform vec4 mClr;
+uniform float mSize;
+
+attribute vec3 vert;
+
+varying vec4 clr;
+
+void main()
+{
+	gl_Position = pMat * vMat * mMat * vec4(vert, 1.0);
+	float d = distance(vMat[3], gl_Position);
+	gl_PointSize = max(2.0, mSize/d);
+	clr = mClr;
+}</script><script id="point_round_frag" type="x-shader/x-fragment">#ifdef GL_ES
+precision highp float;
+#endif
+
+varying vec4 clr;
+
+
+vec4 permute (vec4 x) {
+	return mod(((x*34.0)+1.0)*x, 289.0);
+}
+
+vec4 taylorInvSqrt (vec4 r) {
+	return 1.79284291400159 - 0.85373472095314 * r;
+}
+
+vec2 smoothstep (vec2 t) {
+	return t*t*(3.0-2.0*t);
+}
+
+float smoothstep (float t) {
+	return t*t*(3.0-2.0*t);
+}
+
+float cnoise (vec2 P)
+{
+	// integer and fractional coords for all four corners
+	vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+	vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+	Pi = mod(Pi, 289.0); // avoid truncation effects in permutation
+	vec4 ix = Pi.xzxz;
+	vec4 iy = Pi.yyww;
+	vec4 fx = Pf.xzxz;
+	vec4 fy = Pf.yyww;
+	
+	vec4 i = permute(permute(ix) + iy);
+	
+	// gradients from 41 points on a line mapped to a diamond
+	vec4 gx = 2.0 * fract(i * (1.0 / 41.0)) - 1.0;
+	vec4 gy = abs(gx) - 0.5;
+	vec4 tx = floor(gx + 0.5);
+	gx = gx - tx;
+	
+	vec2 g00 = vec2(gx.x, gy.x);
+	vec2 g10 = vec2(gx.y, gy.y);
+	vec2 g01 = vec2(gx.z, gy.z);
+	vec2 g11 = vec2(gx.w, gy.w);
+	
+	// normalize gradients
+	vec4 norm = taylorInvSqrt(vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11)));
+	g00 *= norm.x;
+	g01 *= norm.y;
+	g10 *= norm.z;
+	g11 *= norm.w;
+	
+	// extrapolation from the four corners
+	float n00 = dot(g00, vec2(fx.x, fy.x));
+	float n10 = dot(g10, vec2(fx.y, fy.y));
+	float n01 = dot(g01, vec2(fx.z, fy.z));
+	float n11 = dot(g11, vec2(fx.w, fy.w));
+	
+	// interpolation to compute final noise value
+	vec2 fade_xy = smoothstep(Pf.xy);
+	vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+	float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+	return 2.3 * n_xy;
+}
+
+void main ()
+{
+	// discard if outside circle
+	float len = length(gl_PointCoord-vec2(0.5,0.5));
+	
+	if (len > 0.5) {
+		discard;
+	}
+	
+	gl_FragColor = clr / (1.0+len*2.0);
+	gl_FragColor.w = 1.0;
+	
+	if (len > 0.45) {
+		gl_FragColor.w = 20.0 * (0.5-len);
+	}
+	
+	
+}
+</script><script>//util = require('/util');
+//shine = require('/shine');
+/*
+window.cli = new shine.Cli('#cli');
+$('.modal').draggable({
+ handle: '.modal-header'
+});
+cli.focus();
+*/
+//widgets = document.querySelectorAll('.widget');
+//new util.Widget('#myTerm');
+//window.cli = new shine.Cli('#myTerm');</script></body></html>

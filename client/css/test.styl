@@ -1,0 +1,55 @@
+// Example Stylus file
+//
+// Stylus docs:  http://learnboost.github.com/stylus/docs/js.html
+// Nib docs:     http://visionmedia.github.com/nib
+
+@import url('/font/OpenSans.css')
+@import url('/font/DroidSansMono.css')
+
+//FONT = 'Open Sans', 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, sans-serif
+FONT = "Droid Sans Mono", "Courier New", Courier, monospace
+FONTSIZE = 16px
+
+@import 'nib'
+
+global-reset()
+reset-html5()
+
+@import 'helpers'
+@import 'globals'
+@import 'CLI'
+@import 'widget'
+
+
+#cli
+	//position absolute
+	//top 60px
+	//left 300px
+	//width 600px
+	height 300px
+
+#stats_bar
+	position absolute
+	top 0
+	left 0
+#ffi_bar
+	position absolute
+	top 50px
+	left 0
+#fi_bar
+	position absolute
+	top 63px
+	left 0
+
+#ascii
+	// phosphor shades
+	P1 = #44cc00 // green 80
+	P1b = #56ff00 //green 100
+	P3 = #cc6600 // amber 80
+	P3b = #ff8100 //amber 100
+	P4 = #cc // white 80
+	
+	background-image radial-gradient( ellipse, hsl(225, 58%, 12%), hsl(225, 58%, 8%) )
+	//background-color hsl(225, 58%, 12%)
+	
+	color P3

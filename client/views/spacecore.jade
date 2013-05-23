@@ -1,0 +1,60 @@
+extends shared/base
+
+block title
+	title test shine
+
+block body
+	table#stats
+		tr#ffiBar
+			td ffi
+			td.val -
+		tr#fiBar
+			td fi
+			td.val -
+		tr#fpsBar
+			td fps
+			td.val -
+		tr
+			td#statsBar
+		tr
+			td
+			td#debug_output
+	
+	canvas#main
+		
+
+block bodyscripts
+	script#passthru_vert(type='x-shader/x-vertex')
+		include shaders/passthru.vert
+	script#passthru_frag(type='x-shader/x-fragment')
+		include shaders/passthru.frag
+	script#blinn_phong_vert(type='x-shader/x-vertex')
+		include shaders/blinn_phong.vert
+	script#blinn_phong_frag(type='x-shader/x-fragment')
+		include shaders/blinn_phong.frag
+	script#point_round_vert(type='x-shader/x-vertex')
+		include shaders/point_round.vert
+	script#point_round_frag(type='x-shader/x-fragment')
+		include shaders/point_round.frag
+	script#point_square_vert(type='x-shader/x-vertex')
+		include shaders/point_square.vert
+	script#point_square_frag(type='x-shader/x-fragment')
+		include shaders/point_square.frag
+	
+	script
+		//util = require('/util');
+		//shine = require('/shine');
+		
+		/*
+		window.cli = new shine.Cli('#cli');
+		
+		$('.modal').draggable({
+			handle: '.modal-header'
+		});
+		
+		cli.focus();
+		*/
+		
+		//widgets = document.querySelectorAll('.widget');
+		//new util.Widget('#myTerm');
+		//window.cli = new shine.Cli('#myTerm');

@@ -1,0 +1,44 @@
+.widget
+	RADIUS = 2px
+	HEADER_PADDING = 4px
+	
+	position absolute
+	
+	border-radius RADIUS
+	box-shadow 0 0 4px rgba(#000, 1.0)
+	
+	> header
+		clearfix()
+		cursor move
+		user-select none
+		
+		background-color #282828
+		border-radius RADIUS RADIUS 0 0
+		border-bottom 1px solid #222
+		
+		*
+			color #999
+			font-family 'Droid Sans Mono'
+			font-weight bold
+			font-size 12px
+			letter-spacing -1px
+		
+		> h1
+			float left
+			text-align left
+			padding HEADER_PADDING
+		
+		> button
+			float right
+			color rgba(#f00, .4)
+			background none
+			padding 0 HEADER_PADDING 0 0
+			border none
+			margin-top -1px
+			
+			&:hover
+				color rgba(#f00, 0.8)
+	
+	> section
+		border-radius 0 0 RADIUS RADIUS
+		overflow hidden

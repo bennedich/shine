@@ -1,0 +1,97 @@
+
+html
+	position relative
+	min-height 100%
+
+
+body
+	//width 100%
+	height 100%
+	font-family FONT
+	color #222
+
+
+h1, h2, h3, h4
+	text-align center
+
+h1, h2, h3, h5
+	font-weight 700
+
+h4, h6
+	font-weight 400
+
+h1
+	font-size ( 4*FONTSIZE )
+	line-height .8
+	letter-spacing -6px
+	
+h2
+	font-size ( 3*FONTSIZE )
+	letter-spacing -4px
+	
+h3
+	font-size ( 2*FONTSIZE )
+	letter-spacing -2px
+	
+h4
+	font-size ( 1.5*FONTSIZE )
+	
+h5
+	font-size ( 1.25*FONTSIZE )
+	
+h6
+	font-size ( 1.25*FONTSIZE )
+
+p
+	font-size FONTSIZE
+	font-weight 300
+
+/* box-shadow 0 0 80px rgba(0,0,0,.7) inset // lags too much in chrome :( */
+
+
+::moz-selection
+	background #b3d4fc
+	text-shadow none
+
+
+::selection
+	background #b3d4fc
+	text-shadow none
+
+
+*
+	-moz-box-sizing border-box
+	box-sizing border-box
+
+
+hr
+	display block
+	height 1px
+	border 0
+	border-top 1px solid #ccc
+	margin 1em 0
+	padding 0
+
+
+img
+	vertical-align middle
+
+
+textarea
+	resize vertical
+
+
+fieldset
+	border 0
+	margin 0
+	padding 0
+
+
+button
+	color #222
+	cursor pointer
+
+
+input
+	&:focus
+		outline none

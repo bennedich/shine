@@ -1,0 +1,41 @@
+// Helper functions
+
+vertical-gradient( from, to )
+	background-image linear-gradient( top, from, to )
+
+
+horizontal-gradient( from, to )
+	background-image linear-gradient( left, from, to )
+
+/*
+radial-gradient( args... )
+	// shape: circle || ellipse && contain || cover
+	// from/to: transparent || name || rgb(a) && percentage
+	prop = current-property[ 0 ]
+	val = current-property[ 1 ]
+	args = join(', ', args)
+	
+	for prefix in vendor-prefixes
+		if prefix is official
+			'radial-gradient(' + args + ')'
+		else
+			gradient = prefix + '-radial-gradient(' + args + ')'
+			add-property( prop, replace( val, '__CALL__', gradient ) )
+	return radial-gradient( args )
+*/	
+	
+
+
+transform-origin()
+	vendor transform-origin arguments
+
+transform-style()
+	vendor transform-style arguments
+
+perspective()
+	vendor perspective arguments
+
+perspective-origin()
+	vendor perspective-origin arguments
+
+

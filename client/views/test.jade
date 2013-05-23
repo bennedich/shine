@@ -1,0 +1,51 @@
+extends shared/base
+
+block title
+	title test shine
+
+block body
+	div#stats
+		div#stats_bar
+		p#ffi_bar [fixed frame index]
+		p#fi_bar [frame index]
+
+	section#main
+		h1 main &times; CONTNETN
+		
+		//
+			div.modal
+				header.modal-header
+					b Terminal
+				div#cli.modal-body
+				footer.modal-footer
+					p term
+		
+		div#ascii(
+			style='position: absolute; top: 100px; left: 100px;')
+			p One long incredibly unbroken sentence moving from topic to topic
+		
+		//
+			div.widget(
+			id='myTerm'
+			style='width:300px;height:200px;left:500px;top:400px;',
+			data-app='terminal')
+
+
+block bodyscripts
+	script
+		//util = require('/util');
+		//shine = require('/shine');
+		
+		/*
+		window.cli = new shine.Cli('#cli');
+		
+		$('.modal').draggable({
+			handle: '.modal-header'
+		});
+		
+		cli.focus();
+		*/
+		
+		//widgets = document.querySelectorAll('.widget');
+		//new util.Widget('#myTerm');
+		//window.cli = new shine.Cli('#myTerm');
