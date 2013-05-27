@@ -18,6 +18,7 @@ module.exports =
 	Unit2D		: r CORE, 'Unit2D'
 	Unit3D		: r CORE, 'Unit3D'
 	Camera		: r CORE, 'Camera'
+	Texture		: r CORE, 'Texture'
 	Shader		: r CORE, 'Shader'
 	Buffer		: r CORE, 'Buffer'
 	createShader	: r CORE, 'createShader'

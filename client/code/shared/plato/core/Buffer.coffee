@@ -16,7 +16,7 @@ class Buffer
 		gl.bindBuffer @bufferTarget, @glBuffer
 		gl.bufferData @bufferTarget, @buffer, @usage
 		gl.enableVertexAttribArray @attribIndex
-		gl.vertexAttribPointer @attribIndex, @itemSize, @datatype, false, 0, 0
+		gl.vertexAttribPointer @attribIndex, @itemSize, @datatype, false, 0, 0 # TODO this line not needed? It changes which buffer object should currently be drawn, it should always be done after gl.bindBuffer
 
 	bind : ->
 		@gl.bindBuffer @bufferTarget, @glBuffer

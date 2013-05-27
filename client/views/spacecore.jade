@@ -25,21 +25,26 @@ block body
 
 block bodyscripts
 	script#passthru_vert(type='x-shader/x-vertex')
-		include shaders/passthru.vert
+		include ../shaders/passthru.vert
 	script#passthru_frag(type='x-shader/x-fragment')
-		include shaders/passthru.frag
+		include ../shaders/passthru.frag
 	script#blinn_phong_vert(type='x-shader/x-vertex')
-		include shaders/blinn_phong.vert
+		include ../shaders/blinn_phong.vert
 	script#blinn_phong_frag(type='x-shader/x-fragment')
-		include shaders/blinn_phong.frag
+		include ../shaders/blinn_phong.frag
 	script#point_round_vert(type='x-shader/x-vertex')
-		include shaders/point_round.vert
+		include ../shaders/point_round.vert
 	script#point_round_frag(type='x-shader/x-fragment')
-		include shaders/point_round.frag
+		include ../shaders/point_round.frag
 	script#point_square_vert(type='x-shader/x-vertex')
-		include shaders/point_square.vert
+		include ../shaders/point_square.vert
 	script#point_square_frag(type='x-shader/x-fragment')
-		include shaders/point_square.frag
+		include ../shaders/point_square.frag
+
+	script#skybox2d_vert(type='x-shader/x-vertex')
+		include ../shaders/skybox2d.vert
+	script#skybox2d_frag(type='x-shader/x-fragment')
+		include ../shaders/skybox2d.frag
 	
 	script
 		//util = require('/util');

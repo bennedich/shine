@@ -40,6 +40,9 @@ class Renderer
 		gl.enable gl.DEPTH_TEST
 		gl.depthFunc gl.LEQUAL #gl.LESS gl.GREATER
 		gl.depthMask true
+
+		# texture
+		gl.pixelStorei gl.UNPACK_FLIP_Y_WEBGL, true
 		
 		log 'vendor:', gl.getParameter gl.VENDOR
 		log 'renderer:', gl.getParameter gl.RENDERER
@@ -66,17 +69,15 @@ class Renderer
 	
 	preRender : (cam) ->
 		# TODO
-		if @canvasResized
-			@canvasResized = false
-			cam.setAspectRatio @aspect
-		
+		@cam = cam
 		@gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
 		return
 	
-	
-	
 	postRender : ->
 		# TODO
+		if @canvasResized
+			@canvasResized = false
+			@cam.setAspectRatio @aspect
 		return	
 
 

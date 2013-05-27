@@ -23,6 +23,124 @@ err = console.error.bind console, '[spacecore]'
 
 ε = 0.16
 
+class SatBox extends plato.Unit2D
+	__t1mat2d = mat2d.create() # intermediate storage
+	__t1mat4 = mat4.create() # intermediate storage
+
+	constructor : (gl, x, y, @w, @h) ->
+		super()
+		@w2 = 0.5 * @w
+		@h2 = 0.5 * @h
+		@right x
+		@up y
+		
+		@shaderHandle = 'passthru'
+		shader = plato.createShader gl, @shaderHandle
+		gl.useProgram shader.program
+		@buffer = new plato.Buffer gl, gl.ARRAY_BUFFER, gl.STREAM_DRAW, gl.FLOAT, shader.vert, 3, 4
+		@addVert 0, -@w2, -@h2
+		@addVert 1,  @w2, -@h2
+		@addVert 2, -@w2,  @h2
+		@addVert 3,  @w2,  @h2
+
+	addVert : (i,x,y) ->
+		i *= 3
+		@buffer.buffer[i] = x
+		@buffer.buffer[i+1] = y
+		@buffer.buffer[i+2] = -0.1
+	
+	fixedUpdate : (ffi) ->
+		# {matrix} = @
+		#@rotate 0.01
+		#@lastX = matrix[X4]
+		#@lastY = matrix[Y4]
+		#@matrix[X4] = @nextX
+		#@matrix[Y4] = @nextY
+
+	draw : (rndr, cam) ->
+		{buffer} = @
+		{gl} = rndr
+		shader = rndr.setShader @shaderHandle
+
+		if @parent?
+			modelMatrix = mat2d.mul __t1mat2d, @matrix, @parent.matrix
+		else
+			modelMatrix = @matrix
+
+		gl.uniformMatrix4fv shader.pMat, false, cam.perspective
+		gl.uniformMatrix4fv shader.vMat, false, cam.view
+		gl.uniformMatrix4fv shader.mMat, false, @matrix4 modelMatrix
+		gl.uniform4fv shader.mClr, RED
+		#gl.uniform1f shader.mSize, @h * rndr.h * cam.perspective[0]
+		buffer.bind()
+		buffer.bufferSubData()
+		gl.drawArrays gl.TRIANGLE_STRIP, 0, 4
+
+class SkyBox2D extends plato.Unit2D
+	constructor : (gl, image) ->
+		super()
+
+		@rawW = image.width
+		@rawH = image.height
+		@rawAspect = @rawW / @rawH
+
+		@w = 1.6
+		@h = 1
+		@w2 = 0.8
+		@h2 = 0.5
+
+		@shaderHandle = 'skybox2d'
+		shader = plato.createShader gl, @shaderHandle
+		gl.useProgram shader.program
+		
+		@texture = new plato.Texture gl, image
+
+		@textureBuffer = new plato.Buffer gl, gl.ARRAY_BUFFER, gl.STATIC_DRAW, gl.FLOAT, shader.texture_coords, 2, 4
+		@setVert @textureBuffer.buffer, 0, 0, 0
+		@setVert @textureBuffer.buffer, 1, 1, 0
+		@setVert @textureBuffer.buffer, 2, 0, 1
+		@setVert @textureBuffer.buffer, 3, 1, 1
+		@textureBuffer.bufferSubData()
+		@vertBuffer = new plato.Buffer gl, gl.ARRAY_BUFFER, gl.STATIC_DRAW, gl.FLOAT, shader.vert, 2, 4
+
+	setVert : (buffer, i, x, y) ->
+		i *= 2
+		buffer[i] = x
+		buffer[i+1] = y
+
+	draw : (rndr, cam) ->
+		{textureBuffer, vertBuffer} = @
+		{gl} = rndr
+		shader = rndr.setShader @shaderHandle
+		
+		if rndr.canvasResized
+			w2 = Math.max 1, @rawAspect / rndr.aspect
+			h2 = Math.max 1, rndr.aspect / @rawAspect
+			@setVert @vertBuffer.buffer, 0, -w2, -h2
+			@setVert @vertBuffer.buffer, 1,  w2, -h2
+			@setVert @vertBuffer.buffer, 2, -w2,  h2
+			@setVert @vertBuffer.buffer, 3,  w2,  h2
+			vertBuffer.bind()
+			@vertBuffer.bufferSubData()
+
+		# TODO should be able to use more than TEXTURE0
+		gl.activeTexture gl.TEXTURE0
+		gl.bindTexture gl.TEXTURE_2D, @texture.texture
+		gl.uniform1i shader.texture_skybox, 0
+		
+		#textureBuffer.bind()
+		#textureBuffer.bufferSubData()
+
+		vertBuffer.bind()
+		gl.drawArrays gl.TRIANGLE_STRIP, 0, 4
+
+class Fudge
+	constructor : (gl, image) ->
+		@shaderHandle = 'passthru'
+		shader = plato.createShader gl, @shaderHandle
+		gl.useProgram shader.program
+
+
 class Spacecore
 	module.exports = @
 	
@@ -33,13 +151,16 @@ class Spacecore
 		
 		# config stats env
 		@initAssets()
-		@initStats()
-		@initCore()
-		@initScene()
-		@start()
 	
 	initAssets : ->
 		#
+		@i = new Image
+		@i.onload = =>
+			@initStats()
+			@initCore()
+			@initScene()
+			@start()
+		@i.src = '/images/my_little_pony_night_sky_base_by_theblackyofthedark.jpg'
 	
 	initStats : ->
 		# TODO turns out stats are fucking up GC
@@ -69,9 +190,12 @@ class Spacecore
 		@cam = new plato.Camera 1, 1.6, 1e-3, 1e6
 		@cam.matrix[Z4] = 10
 		#@heightMap = new HeightMap gl
-		#@voxelGrid = new VoxelGrid gl
+		@voxelGrid = new VoxelGrid gl
 		#@initPhysWorld()
-		@initSatWorld()
+		#@initSatWorld()
+		@skybox = new SkyBox2D gl, @i
+		#@satbox = new SatBox gl, 0.2, 0.6, 2, 2
+
 	
 	initPhysWorld : ->
 		{gl} = @rndr
@@ -111,9 +235,9 @@ class Spacecore
 		@cam.fixedUpdate ffi
 
 		#@heightMap.fixedUpdate ffi
-		#@voxelGrid.fixedUpdate ffi
+		@voxelGrid.fixedUpdate ffi
 		#@physWorld.fixedUpdate ffi
-		@satWorld.fixedUpdate ffi
+		#@satWorld.fixedUpdate ffi
 	
 	
 	fixedUpdateKeyboard : ->
@@ -192,7 +316,7 @@ class Spacecore
 		#@stats.update()
 		@cam.update fi, dt
 		#@heightMap.update fi, dt
-		#@voxelGrid.update fi, dt
+		@voxelGrid.update fi, dt
 		# movement update
 		
 		#@physWorld.update fi, dt
@@ -213,9 +337,11 @@ class Spacecore
 		rndr.preRender cam
 		
 		#@heightMap.draw rndr, cam
-		#@voxelGrid.draw rndr, cam
+		@voxelGrid.draw rndr, cam
 		#@physWorld.draw rndr, cam
-		@satWorld.draw rndr, cam
+		#@satWorld.draw rndr, cam
+		@skybox.draw rndr, cam
+		#@satbox.draw rndr, cam
 		
 		rndr.postRender()
 		return
