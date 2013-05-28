@@ -12,6 +12,7 @@ HeightMap = require './HeightMap'
 VoxelGrid = require './VoxelGrid'
 PhysicsWorld = require './PhysicsWorld'
 PhysicsBall = require './PhysicsBall'
+PhysCar2D = require './PhysCar2D'
 
 {INTERVAL, STARTED, STOPPED, FIXED_UPDATE, UPDATE, DRAW} = plato.loopAux
 {X,Y,Z, X2,Y2, X3,Y3, X4,Y4,Z4} = plato.unitAux
@@ -76,24 +77,18 @@ class SatBox extends plato.Unit2D
 		buffer.bufferSubData()
 		gl.drawArrays gl.TRIANGLE_STRIP, 0, 4
 
+
 class SkyBox2D extends plato.Unit2D
 	constructor : (gl, image) ->
 		super()
 
-		@rawW = image.width
-		@rawH = image.height
-		@rawAspect = @rawW / @rawH
-
-		@w = 1.6
-		@h = 1
-		@w2 = 0.8
-		@h2 = 0.5
+		@rawAspect = image.width / image.height
 
 		@shaderHandle = 'skybox2d'
 		shader = plato.createShader gl, @shaderHandle
 		gl.useProgram shader.program
 		
-		@texture = new plato.Texture gl, image
+		@texture = new plato.Texture gl, image, gl.TEXTURE0
 
 		@textureBuffer = new plato.Buffer gl, gl.ARRAY_BUFFER, gl.STATIC_DRAW, gl.FLOAT, shader.texture_coords, 2, 4
 		@setVert @textureBuffer.buffer, 0, 0, 0
@@ -134,14 +129,8 @@ class SkyBox2D extends plato.Unit2D
 		vertBuffer.bind()
 		gl.drawArrays gl.TRIANGLE_STRIP, 0, 4
 
-class Fudge
-	constructor : (gl, image) ->
-		@shaderHandle = 'passthru'
-		shader = plato.createShader gl, @shaderHandle
-		gl.useProgram shader.program
 
-
-class Spacecore
+class Spacecore extends EventEmitter
 	module.exports = @
 	
 	constructor : (@selector) ->
@@ -150,17 +139,25 @@ class Spacecore
 		@draw = @draw.bind @
 		
 		# config stats env
-		@initAssets()
+
+		@assets = [
+			'/images/my_little_pony_night_sky_base_by_theblackyofthedark.jpg'
+			'/images/car.png'
+		]
+		@initAssets @assets, 0
 	
-	initAssets : ->
-		#
-		@i = new Image
-		@i.onload = =>
+	initAssets : (assets, i) =>
+		if i is assets.length
 			@initStats()
 			@initCore()
 			@initScene()
 			@start()
-		@i.src = '/images/my_little_pony_night_sky_base_by_theblackyofthedark.jpg'
+		else
+			image = new Image
+			image.onload = =>
+				assets[i] = image
+				@initAssets assets, i+1
+			image.src = assets[i]
 	
 	initStats : ->
 		# TODO turns out stats are fucking up GC
@@ -193,7 +190,8 @@ class Spacecore
 		@voxelGrid = new VoxelGrid gl
 		#@initPhysWorld()
 		#@initSatWorld()
-		@skybox = new SkyBox2D gl, @i
+		@skybox = new SkyBox2D gl, @assets[0]
+		@physcar = new PhysCar2D gl, @assets[1]
 		#@satbox = new SatBox gl, 0.2, 0.6, 2, 2
 
 	
@@ -238,6 +236,8 @@ class Spacecore
 		@voxelGrid.fixedUpdate ffi
 		#@physWorld.fixedUpdate ffi
 		#@satWorld.fixedUpdate ffi
+		#@physcar.fixedUpdate ffi
+		return
 	
 	
 	fixedUpdateKeyboard : ->
@@ -273,6 +273,17 @@ class Spacecore
 			@cam.up -d
 		if Keyb[Key.R]
 			@cam.up +d
+
+		# car
+		if Keyb[Key.I]
+			@physcar.acc 1
+		if Keyb[Key.K]
+			@physcar.dec 1
+		if Keyb[Key.J]
+			@physcar.turn 1
+		if Keyb[Key.L]
+			@physcar.turn -1
+		return
 	
 	# axis (analog -1 -> 1)
 	# 0/1 lx/ly
@@ -310,6 +321,7 @@ class Spacecore
 			@cam.roll a * lb
 		if ε < Math.abs rb
 			@cam.roll a * -rb
+		return
 	
 	update : (fi, dt) ->
 		@gamepad0 = gamepad.update fi, dt
@@ -320,6 +332,7 @@ class Spacecore
 		# movement update
 		
 		#@physWorld.update fi, dt
+		#@physcar.update fi, dt
 		return
 	
 	draw : ->
@@ -342,6 +355,7 @@ class Spacecore
 		#@satWorld.draw rndr, cam
 		@skybox.draw rndr, cam
 		#@satbox.draw rndr, cam
+		@physcar.draw rndr, cam
 		
 		rndr.postRender()
 		return

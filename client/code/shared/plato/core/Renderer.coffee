@@ -27,19 +27,19 @@ class Renderer
 		gl.clearColor 0,0,0,0
 		gl.clearDepth 1
 		
-		# fragment blending
-		gl.enable gl.BLEND
-		gl.blendFunc gl.SRC_ALPHA, gl.ONE_MINUS_SOURCE_ALPHA
-		
 		# culling
 		gl.enable gl.CULL_FACE
 		gl.cullFace gl.BACK
 		gl.frontFace gl.CCW
-		
+
 		# depth
 		gl.enable gl.DEPTH_TEST
 		gl.depthFunc gl.LEQUAL #gl.LESS gl.GREATER
 		gl.depthMask true
+
+		# fragment blending
+		gl.enable gl.BLEND
+		gl.blendFunc gl.SRC_ALPHA, gl.ONE_MINUS_SOURCE_ALPHA
 
 		# texture
 		gl.pixelStorei gl.UNPACK_FLIP_Y_WEBGL, true
